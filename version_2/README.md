@@ -64,7 +64,27 @@ MHC Variants Associated With Symptomatic Versus Asymptomatic SARS-CoV-2 Infectio
 MUC22, HLA-A, and HLA-DOB variants and COVID-19 in resilient super-agers from Brazil. Front. Immunol., 25 October 2022, https://doi.org/10.3389/fimmu.2022.975918
 
 ## STEP 0: Downloading/Extracting sequencing MHC data
+When working with whole-genome sequencing data that has already been aligned to a reference genome, reads originating from highly polymorphic regions such as the MHC might be incorrectly mapped to other genomic locations. As a result, restricting the extraction only to reads mapped within MHC coordinates may lead to loss of information.
 
+To mitigate this, the following approach extracts:
+- reads mapped to the MHC region (defined by a BED file), and
+- all unmapped reads, which may include sequences that failed to align due to high variability.
+
+These reads are then combined and used to generate a reduced BAM file for downstream analyses.
+1. Extract read names mapped to the MHC region
+> samtools view -@ <threads> -ML MHC.bed -T reference.fa sample.cram | cut -f1 > sample.readlist-mapped.txt
+
+2. Extract read names from unmapped reads
+> samtools view -@ <threads> -f 4 -T reference.fa sample.cram | cut -f1 > sample.readlist-unmapped.txt
+
+3. Combine mapped and unmapped reads into a single list
+> cat sample.readlist-mapped.txt sample.readlist-unmapped.txt | sort | uniq > sample.readlist.txt
+
+4. Extract selected reads into a BAM file
+> samtools view -@ <threads> -T reference.fa -hb -N sample.readlist.txt -o sample.MHC_KIR_NKG.bam sample.cram
+
+5. Index the resulting BAM file
+> samtools index -@ <threads> sample.MHC_KIR_NKG.bam
 
 ## STEP 1: Using hla-mapper to get unbiased read alignment for HLA genes
 This step is essential. You won't retrieve accurate genotypes in HLA genes unless you use an alignment method tailored for these genes.
