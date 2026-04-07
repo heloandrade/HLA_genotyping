@@ -63,6 +63,8 @@ MHC Variants Associated With Symptomatic Versus Asymptomatic SARS-CoV-2 Infectio
 
 MUC22, HLA-A, and HLA-DOB variants and COVID-19 in resilient super-agers from Brazil. Front. Immunol., 25 October 2022, https://doi.org/10.3389/fimmu.2022.975918
 
+## STEP 0: Downloading/Extracting sequencing MHC data
+
 
 ## STEP 1: Using hla-mapper to get unbiased read alignment for HLA genes
 This step is essential. You won't retrieve accurate genotypes in HLA genes unless you use an alignment method tailored for these genes.
