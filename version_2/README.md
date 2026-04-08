@@ -64,11 +64,11 @@ MHC Variants Associated With Symptomatic Versus Asymptomatic SARS-CoV-2 Infectio
 MUC22, HLA-A, and HLA-DOB variants and COVID-19 in resilient super-agers from Brazil. Front. Immunol., 25 October 2022, https://doi.org/10.3389/fimmu.2022.975918
 
 ## STEP 0: Downloading/Extracting sequencing MHC data
-When working with whole-genome sequencing data that has already been aligned to a reference genome, reads originating from highly polymorphic regions such as the MHC might be incorrectly mapped to other genomic locations. As a result, restricting the extraction only to reads mapped within MHC coordinates may lead to loss of information.
+When working with whole-genome sequencing data that has already been aligned to a reference genome, reads from highly polymorphic regions such as the MHC may be misaligned to other genomic locations. In paired-end data, this can result in discordant pairs, where one read maps to the MHC region while its mate maps elsewhere.
 
-To mitigate this, the following approach extracts:
-- reads mapped to the MHC region (defined by a BED file), and
-- all unmapped reads, which may include sequences that failed to align due to high variability.
+The following steps are recommended to ensure that all read pairs associated with the MHC region are fully recovered.
+
+To achieve this, a BED file defining MHC coordinates is used to extract the names of reads mapped to this region. These read identifiers are then used to retrieve all corresponding reads from the original CRAM/BAM file, ensuring that both mates are included, even if one of them is mapped to a different chromosome or remains unmapped.
 
 These reads are then combined and used to generate a reduced BAM file for downstream analyses.
 1. Extract read names mapped to the MHC region
