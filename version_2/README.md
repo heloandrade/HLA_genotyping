@@ -173,10 +173,11 @@ Now, you can genotype your GVCF using GATK GenotypeGVCFs. If you used CombineGVF
 ```
 
 The regions corresponding to the targeted BED intervals were removed from the MHC-wide VCF using bcftools view. The same BED files (problematic_snps-noDQA1.bed and problematic_region.bed) were applied here to exclude these regions.
-> bcftools view -T ^region/snps.bed -Oz -o MHC_noRegon-noSNPs.vcf.gz MHC.vcf.gz
+> bcftools view -T ^region/snps.bed -Oz -o MHC_noRegion-noSNPs.vcf.gz MHC.vcf.gz
 
 The filtered MHC-wide VCF was then concatenated with the VCFs generated from the targeted regions:
-> bcftools concat -Oz -o final.vcf.gz filtered_genome.vcf.gz targeted_1.vcf.gz targeted_2.vcf.gz targeted_3.vcf.gz
+> bcftools concat -Oz -o MHC_withRegions_withSNPs.vcf.gz MHC_noRegion-noSNPs.vcf.gz regions.vcf.gz snps.vcf.gz
+The concatenated VCF was subsequently sorted using bcftools sort to ensure proper genomic ordering.
 
 ## STEP 4 - Variant refinement
 There are many ways to proceed with variant refinement, i.e., removing artifacts. Here, we will combine GATK VQSR (better for large sample sizes, WGS and WES) and vcfx (better for small datasets).
