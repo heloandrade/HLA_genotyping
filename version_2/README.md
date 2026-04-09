@@ -164,7 +164,7 @@ Repeat this step for every sample.
 
 After processing all your samples, you need to combine all G.VCF files into one. There are two ways to do that, depending on the number of samples. The most common one is using GATK CombineGVCFs (https://gatk.broadinstitute.org/hc/en-us/articles/360037053272-CombineGVCFs). The other is GenomicsDBImport (https://gatk.broadinstitute.org/hc/en-us/articles/360036883491-GenomicsDBImport). This tutorial does not cover this issue. Please follow the GATK instructions and combine all GVCFS into one.
 
-# Each of the three gVCF files was processed independently through GenomicsDBImport and joint genotyping before being concatenated into a single VCF file.
+#### Each of the three gVCF files was processed independently through GenomicsDBImport and joint genotyping before being concatenated into a single VCF file.
 
 Now, you can genotype your GVCF using GATK GenotypeGVCFs. If you used CombineGVFs, one example is this:
 > java -Xmx32g -jar gatk-package-4.2.0.0-local.jar GenotypeGVCFs -R reference_genome -O output_folder/MHC.vcf -L chr6:29700000-33150000 --variant output_folder/All_samples.MHC.g.vcf --dbsnp path_to_dbsnp_vcf
