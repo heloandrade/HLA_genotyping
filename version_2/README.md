@@ -144,6 +144,18 @@ The hla-mapper BAM file is already prepared for GATK and freebayes. For Ion data
 For each sample, run GATK HaplotypeCaller in the GVCF mode, such as this example:
 > java -Xmx32g -jar gatk-package-4.2.0.0-local.jar HaplotypeCaller -R reference_genome -I Sample_name.adjusted.bam -O output_folder/Sample_name.MHC.g.vcf -L chr6:29700000-33150000 -ERC GVCF --max-num-haplotypes-in-population 256 --native-pair-hmm-threads thread_number --allow-non-unique-kmers-in-ref TRUE
 
+During variant calling with GATK HaplotypeCaller, we observed that some variants in highly polymorphic regions were not properly detected. Visual inspection in IGV showed clear heterozygous sites with balanced read support, but HaplotypeCaller often reported them as homozygous reference. 
+We were able to solve this issue by using the parameter --assembly-region-padding 200 for the regions chr6:32664798–32664845 and chr6:32664847–32664947 in the HLA-DQB1 gene (intervals defined in the BED file). This approach improved variant detection in the 1000 Genomes and HGDP datasets. However, this issue was not observed in the SABE dataset, and adding this parameter in that case led to worse results.
+> java -Xmx32g -jar /home/DATA/apps/gatk-4.5.0.0/gatk-package-4.5.0.0-local.jar HaplotypeCaller -R /dados/home/DATA/reference_files/chr6.fasta -I /dados/home/DATA/HLAcalls_1kgenHGDP_2024/mark_duplicate/*.bam -O "sample".g.vcf -L /home/DATA/HLAcalls_1kgenHGDP_2024/scripts/problematic_region.bed -ERC GVCF --max-num-haplotypes-in-population 256 --native-pair-hmm-threads 10 --allow-non-unique-kmers-in-ref TRUE  --assembly-region-padding 200
+
+We also identified errors in other regions, particularly affecting isolated variant sites. For these cases, variant calling was performed separately using specific BED intervals:
+chr6:32589645–32589647
+chr6:32589656–32589659
+chr6:32508254–32508256
+chr6:32580248–32580250
+> java -Xmx32g -jar /home/DATA/apps/gatk-4.5.0.0/gatk-package-4.5.0.0-local.jar HaplotypeCaller -R /dados/home/DATA/reference_files/chr6.fasta -I /dados/home/DATA/HLAcalls_1kgenHGDP_2024/mark_duplicate/*.bam -O "sample".g.vcf -L /home/DATA/HLAcalls_1kgenHGDP_2024/scripts/problematic_snps-noDQA1.bed -ERC GVCF --max-num-haplotypes-in-population 256 --native-pair-hmm-threads 10 --allow-non-unique-kmers-in-ref TRUE
+
+
 ```diff
 - Attention: If you are interested only in one gene (e.g., HLA-A), you can adjust the interval accordingly. You need to adjust the amount of memory (in this case, 32Gb), the path for the reference genome (reference_genome), the path for the hla-mapper output BAM (Sample_name.adjusted.bam), the output folder (output_folder), the sample name, and the number of threads (thread_number).
 ```
@@ -152,11 +164,19 @@ Repeat this step for every sample.
 
 After processing all your samples, you need to combine all G.VCF files into one. There are two ways to do that, depending on the number of samples. The most common one is using GATK CombineGVCFs (https://gatk.broadinstitute.org/hc/en-us/articles/360037053272-CombineGVCFs). The other is GenomicsDBImport (https://gatk.broadinstitute.org/hc/en-us/articles/360036883491-GenomicsDBImport). This tutorial does not cover this issue. Please follow the GATK instructions and combine all GVCFS into one.
 
+# Each of the three gVCF files was processed independently through GenomicsDBImport and joint genotyping before being concatenated into a single VCF file.
+
 Now, you can genotype your GVCF using GATK GenotypeGVCFs. If you used CombineGVFs, one example is this:
 > java -Xmx32g -jar gatk-package-4.2.0.0-local.jar GenotypeGVCFs -R reference_genome -O output_folder/MHC.vcf -L chr6:29700000-33150000 --variant output_folder/All_samples.MHC.g.vcf --dbsnp path_to_dbsnp_vcf
 ```diff
 - Attention: If you are interested only in one gene (e.g., HLA-A), you can adjust the interval accordingly. You need to adjust the amount of memory (in this case, 32Gb), the path for the reference genome (reference_genome), the path for the hla-mapper output BAM (Sample_name.adjusted.bam), the output folder (output_folder), the sample name, and the number of threads (thread_number). dbSNP is optional.
 ```
+
+The regions corresponding to the targeted BED intervals were removed from the MHC-wide VCF using bcftools view. The same BED files (problematic_snps-noDQA1.bed and problematic_region.bed) were applied here to exclude these regions.
+> bcftools view -T ^region/snps.bed -Oz -o MHC_noRegon-noSNPs.vcf.gz MHC.vcf.gz
+
+The filtered MHC-wide VCF was then concatenated with the VCFs generated from the targeted regions:
+> bcftools concat -Oz -o final.vcf.gz filtered_genome.vcf.gz targeted_1.vcf.gz targeted_2.vcf.gz targeted_3.vcf.gz
 
 ## STEP 4 - Variant refinement
 There are many ways to proceed with variant refinement, i.e., removing artifacts. Here, we will combine GATK VQSR (better for large sample sizes, WGS and WES) and vcfx (better for small datasets).
