@@ -177,6 +177,7 @@ The regions corresponding to the targeted BED intervals were removed from the MH
 
 The filtered MHC-wide VCF was then concatenated with the VCFs generated from the targeted regions:
 > bcftools concat -Oz -o MHC_withRegions_withSNPs.vcf.gz MHC_noRegion-noSNPs.vcf.gz regions.vcf.gz snps.vcf.gz
+
 The concatenated VCF was subsequently sorted using bcftools sort to ensure proper genomic ordering.
 
 ## STEP 4 - Variant refinement
