@@ -63,7 +63,7 @@ MHC Variants Associated With Symptomatic Versus Asymptomatic SARS-CoV-2 Infectio
 
 MUC22, HLA-A, and HLA-DOB variants and COVID-19 in resilient super-agers from Brazil. Front. Immunol., 25 October 2022, https://doi.org/10.3389/fimmu.2022.975918
 
-## STEP 0: Downloading/Extracting sequencing MHC data
+## STEP 0: Downloading/Extracting sequencing MHC data from WGS
 When working with whole-genome sequencing data that has already been aligned to a reference genome, reads from highly polymorphic regions such as the MHC may be misaligned to other genomic locations. In paired-end data, this can result in discordant pairs, where one read maps to the MHC region while its mate maps elsewhere.
 
 The following steps are recommended to ensure that all read pairs associated with the MHC region are fully recovered.
@@ -91,14 +91,13 @@ This step is essential. You won't retrieve accurate genotypes in HLA genes unles
  
 hla-mapper supports many genes in the MHC region. Please check its website for instructions (www.castelli-lab.net/apps/hla-mapper)
 
-
+<span style="color:blue">
 There are two possible inputs for hla-mapper, a BAM file (step 1A) or FASTQ files (step 1B). Step 1A allows you to get genotypes in intergenic regions, while step 1B focuses only on the HLA genes. Step 1A is also suitable if you already have a BAM file with reads aligned to the hg38 reference genome.
-
+</span>
 
 ### STEP 1A: 
 If you already have a BAM file aligned to the human reference genome hg38, you may skip the first part and go directly to the hla-mapper part. 
 Download a copy of the human reference genome (hg38) and prepare it for BWA. We recommend using a reference genome with the "chr" annotation for chromosomes, such as hg38DH used in the 1000Genomes project. All the scripts in this pipeline were designed for a reference genome with "chr6".
-
 
 Prepare it for BWA:
 
@@ -110,7 +109,7 @@ Using BWA MEM, map your reads against the reference genome, and sort it. You sho
 > bwa mem -R '@RG\tID:foo\tSM:foo' reference_genome R1.fastq R2.fastq | samtools sort - > sample.bam
 > samtools index sample.bam
 
-Get unbiased alignments with hla-mapper 4. The sample name should be the same as the one used in the previous BWA step, such as:
+Get unbiased alignments with hla-mapper4. The sample name should be the same as the one used in the previous BWA step, such as:
 
 > hla-mapper dna threads=number_of_threads bam=sample.bam db=hla_mapper_database sample=foo output=output_folder
 
