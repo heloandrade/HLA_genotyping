@@ -91,9 +91,7 @@ This step is essential. You won't retrieve accurate genotypes in HLA genes unles
  
 hla-mapper supports many genes in the MHC region. Please check its website for instructions (www.castelli-lab.net/apps/hla-mapper)
 
-<span style="color:blue">
-There are two possible inputs for hla-mapper, a BAM file (step 1A) or FASTQ files (step 1B). Step 1A allows you to get genotypes in intergenic regions, while step 1B focuses only on the HLA genes. Step 1A is also suitable if you already have a BAM file with reads aligned to the hg38 reference genome.
-</span>
+<mark>There are two possible inputs for hla-mapper, a BAM file (step 1A) or FASTQ files (step 1B). Step 1A allows you to get genotypes in intergenic regions, while step 1B focuses only on the HLA genes. Step 1A is also suitable if you already have a BAM file with reads aligned to the hg38 reference genome.</mark>
 
 ### STEP 1A: 
 If you already have a BAM file aligned to the human reference genome hg38, you may skip the first part and go directly to the hla-mapper part. 
