@@ -174,21 +174,28 @@ chr6:32580248–32580250
 
 <mark> After processing all your samples, you need to combine all G.VCF files into one. There are two ways to do that, depending on the number of samples. The most common one is using GATK CombineGVCFs (https://gatk.broadinstitute.org/hc/en-us/articles/360037053272-CombineGVCFs). The other is GenomicsDBImport (https://gatk.broadinstitute.org/hc/en-us/articles/360036883491-GenomicsDBImport). This tutorial does not cover this issue. Please follow the GATK instructions and combine all GVCFS into one. </mark>
 
+#### Each of the three gVCF files was processed independently through GenomicsDBImport and joint genotyping before being concatenated into a single VCF file.
+
 > [!TIP]
 > After processing all samples in GVCF mode, we combined the individual GVCF files using GATK GenomicsDBImport (https://gatk.broadinstitute.org/hc/en-us/articles/360036883491-GenomicsDBImport) to create a single GenomicsDB workspace for downstream joint genotyping.
 > Example command:
 > > gatk GenomicsDBImport --genomicsdb-workspace-path DBImport --reference chr6.fasta --tmp-dir tmp -L chr6:29700000-33150000 --batch-size 100 -V sample1.g.vcf -V sample2.g.vcf -V sample3.g.vcf ...
 
-#### Each of the three gVCF files was processed independently through GenomicsDBImport and joint genotyping before being concatenated into a single VCF file.
-
-Now, you can genotype your GVCF using GATK GenotypeGVCFs. If you used CombineGVFs, one example is this:
+<mark> Now, you can genotype your GVCF using GATK GenotypeGVCFs. If you used CombineGVFs, one example is this: </mark>
 > java -Xmx32g -jar gatk-package-4.2.0.0-local.jar GenotypeGVCFs -R reference_genome -O output_folder/MHC.vcf -L chr6:29700000-33150000 --variant output_folder/All_samples.MHC.g.vcf --dbsnp path_to_dbsnp_vcf
 ```diff
 - Attention: If you are interested only in one gene (e.g., HLA-A), you can adjust the interval accordingly. You need to adjust the amount of memory (in this case, 32Gb), the path for the reference genome (reference_genome), the path for the hla-mapper output BAM (Sample_name.adjusted.bam), the output folder (output_folder), the sample name, and the number of threads (thread_number). dbSNP is optional.
 ```
 
+> [!TIP]
+> After importing all GVCF files into the GenomicsDB workspace, we performed joint genotyping using GATK GenotypeGVCFs.
+> Example command:
+> > gatk GenotypeGVCFs --reference chr6.fasta -V gendb://DBImport --dbsnp GCF_000001405.40_chr6.gz --output cohort.vcf
+
+
 The regions corresponding to the targeted BED intervals were removed from the MHC-wide VCF using bcftools view. The same BED files (problematic_snps-noDQA1.bed and problematic_region.bed) were applied here to exclude these regions.
-> bcftools view -T ^region/snps.bed -Oz -o MHC_noRegion-noSNPs.vcf.gz MHC.vcf.gz
+> bcftools view -T ^problematic_region.bed -Oz -o MHC_noRegion.vcf.gz MHC.vcf.gz
+> bcftools view -T ^problematic_snps-noDQA1.bed -Oz -o MHC_noRegion-noSNPs.vcf.gz MHC_noRegion.vcf.gz
 
 The filtered MHC-wide VCF was then concatenated with the VCFs generated from the targeted regions:
 > bcftools concat -Oz -o MHC_withRegions_withSNPs.vcf.gz MHC_noRegion-noSNPs.vcf.gz regions.vcf.gz snps.vcf.gz
