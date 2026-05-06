@@ -275,39 +275,51 @@ We use sed to change any "|" allele separator for "/" in VCF file.
 > > bcftools view -T ^known_problems_to_exclude.txt output_noIntrons.vcf > output_noIntrons_knwonProblems.vcf
 
 ## STEP 5 - Calling phasing sets directly from the sequencing data
-In this step, we will infer phase sets (the micro haplotypes) directly from the sequencing data using WhatsHap. We will use these phase sets in the upcoming haplotyping procedure with shapeit4.
+<mark> In this step, we will infer phase sets (the micro haplotypes) directly from the sequencing data using WhatsHap. We will use these phase sets in the upcoming haplotyping procedure with shapeit4. </mark>
 
-We have two options here. 
+<mark> We have two options here. </mark> 
 
-The first option is to run WhatsHap as recommended, using a single core, such as this:
+<mark> The first option is to run WhatsHap as recommended, using a single core, such as this: </mark> 
 > whatshap phase --indels -o whatshap.vcf --reference chr6.fasta --tag PS VCF.VQSR.ad.trim.minac.rec.vcf bam1 bam2 bam3 …
 
-However, we recommend the next option because it uses better your computation resources and maximizes the WhatsHap phasing capacity by transforming some multi-allelic variants into bi-allelic ones.
+<mark> However, we recommend the next option because it uses better your computation resources and maximizes the WhatsHap phasing capacity by transforming some multi-allelic variants into bi-allelic ones. </mark> 
 
-The second (and recommended) option is to run WhatsHap in parallel using the provided script (parallelize_whatshap.pl). This script will split your VCF files into single-sample VCF files, call WhatsHap for each sample in parallel, and join all files in a single VCF.
+<mark> The second (and recommended) option is to run WhatsHap in parallel using the provided script (parallelize_whatshap.pl). This script will split your VCF files into single-sample VCF files, call WhatsHap for each sample in parallel, and join all files in a single VCF. </mark> 
 
-The input for this step is the VCF file produced in step 4 (VCF.VQSR.ad.trim.minac.rec.vcf). The output is a VCF file with phase sets (whatshap.vcf)
-An example of the script to parallelize whatshap:
+<mark> The input for this step is the VCF file produced in step 4 (VCF.VQSR.ad.trim.minac.rec.vcf). The output is a VCF file with phase sets (whatshap.vcf) </mark> 
+<mark> An example of the script to parallelize whatshap: </mark> 
 > perl parallelize_whatshap.pl -v VCF.VQSR.ad.trim.minac.rec.vcf -b /Users/lab/bams/ -o /Users/lab/whatshap_out/ -r chr6.fasta
+
+> [!TIP]
+> In this step, we inferred phase sets (micro-haplotypes) directly from the sequencing data using WhatsHap. These phase sets were then used in the downstream haplotyping procedure with SHAPEIT4.
+> We performed read-based phasing using the **parallelize_whatshap.pl** script together with a pedigree file to improve phasing accuracy. This script splits the input VCF into single-sample VCF files, runs WhatsHap for each sample in parallel, and merges the phased outputs into a single VCF file.
+> The input for this step was the refined VCF generated in Step 4, together with the duplicate-marked BAM files generated in the previous steps.
+> Example command:
+> > perl parallelize_whatshap.pl -v refined.vcf -p pedigree.ped -b /path/to/mark_duplicate_bams/ -r chr6.fasta -o /path/to/whatshap_output/ -t 10
 
 You will find a whatshap.vcf file in the output folder.
 ```diff
-- Attention: You should copy all the .adjusted.bam and .adjusted.bam.bai files from each hla-mapper output to the same location, and indicate this location using the -b option.
+- Attention: You should copy all the .noduplicate.bam and noduplicate.bam.bai files from each hla-mapper output to the same location, and indicate this location using the -b option.
 ```
 
-## STEP 6 - Normalize your WhatsHap VCF to a biallelic VCF
+## STEP 6 - Normalize WhatsHap VCF to a biallelic VCF
 > bcftools norm -m-any whatshap.vcf > whatshap.biallelic.vcf
 
-Use bgzip and tabix to compress and index the whatshap.biallelic.vcf file
+We used bgzip and tabix to compress and index the whatshap.biallelic.vcf file
 
 ***attention: you should use bcftools 1.13***
 
 
 ## STEP 7 - Calling haplotypes
-We will use shapeit4 to call haplotypes. Please check https://odelaneau.github.io/shapeit4/ for instructions on how to do it.
+We used shapeit4 to call haplotypes. We followed the instructions described in https://odelaneau.github.io/shapeit4/ 
 
-An example of this run is as follows:
+<mark> An example of this run is as follows: </mark>
 > shapeit4 --input whatshap.biallelic.vcf.gz --map chr6.b38.gmap.gz --region chr6 --output whatshap.biallelic.shapeit.vcf --thread 10 --mcmc-iterations 10b,1p,1b,1p,1b,1p,1b,1p,10m --sequencing --use-PS 0.0001 
+
+> [!TIP]
+> We used the following command:
+> > shapeit4 --input whatshap_bialelico.vcf.gz --region chr6 --output whatshap_bialelico_shapeit.vcf --thread 20 --mcmc-iterations 10b,1p,1b,1p,1b,1p,1b,1p,10m --sequencing --use-PS 0.0001
+
 
 The final VCF file is a phased biallelic VCF.
 ```diff
