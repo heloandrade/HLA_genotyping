@@ -334,13 +334,13 @@ attention: you should use bcftools 1.13
 ```
 
 ## STEP 9 - Calling complete sequences and HLA alleles
-For this step, we will generate complete sequences for each HLA gene, and compare them with known ones from the IPD-IMGT/HLA database.
+<mark> For this step, we will generate complete sequences for each HLA gene, and compare them with known ones from the IPD-IMGT/HLA database. </mark>
 
-You should use the provided script **hla-mapper_call_alleles.pl
+<mark> You should use the provided script **hla-mapper_call_alleles.pl </mark>
 
-The first step is compressing and indexing the VCF file from step 8 using BGZIP and TABIX.
+<mark> The first step is compressing and indexing the VCF file from step 8 using BGZIP and TABIX. </mark>
 
-A typical run would be something like this:
+<mark> A typical run would be something like this: </mark>
 > perl hla-mapper_call_alleles.pl -v whatshap.biallelic.shapeit.multi.vcf.gz -p HLA-B -o /home/lab/allele_out/ -r chr6.fasta
 
 
@@ -354,58 +354,69 @@ A typical run would be something like this:
 
 
 
-You can check the available profiles in the /bed folder. You may also create a new profile by adding/replacing files following the pattern observed in the /bed folder. 
+<mark> You can check the available profiles in the /bed folder. You may also create a new profile by adding/replacing files following the pattern observed in the /bed folder. </mark>
 
-The /imgt_db/HLA folder contains the IPD-IMGT/HLA database sequences. You can update this data if you want.
+<mark> The /imgt_db/HLA folder contains the IPD-IMGT/HLA database sequences. You can update this data if you want. </mark>
 
-The script will create the output folder and a folder for each profile. These are the files in the output folder, using HLA-B as the profile:
-HLA-B.genomic.fas
+<mark> The script will create the output folder and a folder for each profile. These are the files in the output folder, using HLA-B as the profile: </mark>
 
-A fasta file with two complete sequences for every individual, one per chromosome [h1 and h2]. You should ignore this file when dealing with exomes, or when your sequencing data does not contain intronic and UTR data.
+> [!TIP]
+> In this step, we reconstructed complete HLA gene sequences from the phased VCF generated in the previous steps and compared them against reference sequences from the IPD-IMGT/HLA database.
+> 
+> We used the provided script *hla-mapper_call_alleles.pl* to generate genomic, CDS, and protein sequences for each phased haplotype, as well as to identify known and potentially novel alleles.
+> Before running the script, we compressed and indexed the phased VCF file using BGZIP and TABIX.
+>
+> Example command:
+>  > bash perl hla-mapper_call_alleles.pl -v whatshap.biallelic.shapeit.multi.vcf.gz -p HLA-B -o /path/to/allele_output/ -r chr6.fasta
+>
+> The **/imgt_db/HLA folder** contains the IPD-IMGT/HLA reference database sequences used during allele identification.
+> 
 
+<mark> HLA-B.genomic.fas </mark>
 
-HLA-B.genomic.counted.fas
-
-A fasta file with one copy of each different sequence, their names according to the IPD-IMGT/HLA database, or an indication that they are new, followed by their size and how many times they were detected in your dataset. You should ignore this file when dealing with exomes or when your sequencing data does not contain intronic and UTR data.
-
-
-HLA-B.vcf
-
-This is a copy of the VCF file but containing only the HLA-B region.
-
-
-HLA-B.genomic.groups.fas
-
-If necessary, alleles with the same sequence will be indicated here because you are dealing with a smaller region.
+<mark> A fasta file with two complete sequences for every individual, one per chromosome [h1 and h2]. You should ignore this file when dealing with exomes, or when your sequencing data does not contain intronic and UTR data. </mark>
 
 
-HLA-B.exon.fas
+<mark> HLA-B.genomic.counted.fas </mark>
 
-A fasta file with two exonic sequences for every individual, one per chromosome [h1 and h2]. Exons and concatenated into a single sequence. 
+<mark> A fasta file with one copy of each different sequence, their names according to the IPD-IMGT/HLA database, or an indication that they are new, followed by their size and how many times they were detected in your dataset. You should ignore this file when dealing with exomes or when your sequencing data does not contain intronic and UTR data. </mark>
 
 
-HLA-B.cds.fas
+<mark> HLA-B.vcf </mark>
 
-A fasta file with two CDS sequences for every individual, one per chromosome [h1 and h2]. These sequences start at the first translated ATG and end at the stop codon. Exons and concatenated into a single sequence. 
+<mark> This is a copy of the VCF file but containing only the HLA-B region. </mark>
+
+
+<mark> HLA-B.genomic.groups.fas </mark>
+
+<mark> If necessary, alleles with the same sequence will be indicated here because you are dealing with a smaller region. </mark>
+
+
+<mark> HLA-B.exon.fas </mark>
+
+<mark> A fasta file with two exonic sequences for every individual, one per chromosome [h1 and h2]. Exons and concatenated into a single sequence. </mark>
+
+
+<mark> HLA-B.cds.fas </mark>
+
+<mark> A fasta file with two CDS sequences for every individual, one per chromosome [h1 and h2]. These sequences start at the first translated ATG and end at the stop codon. Exons and concatenated into a single sequence.  </mark>
  
-HLA-B.cds.counted.fas
+<mark> HLA-B.cds.counted.fas </mark>
 
-A fasta file with one copy of each different CDS sequence, their names according to the IPD-IMGT/HLA database, or an indication that they are new, followed by their size and how many times they were detected in your dataset. 
+<mark> A fasta file with one copy of each different CDS sequence, their names according to the IPD-IMGT/HLA database, or an indication that they are new, followed by their size and how many times they were detected in your dataset. </mark>
 
 
-HLA-B.prot.fas
+<mark> HLA-B.prot.fas </mark>
 
-A fasta file with two protein sequences for every individual, one per chromosome [h1 and h2]. They are a translation of the ones in the HLA-B.cds.fas. 
+<mark> A fasta file with two protein sequences for every individual, one per chromosome [h1 and h2]. They are a translation of the ones in the HLA-B.cds.fas. </mark>
  
-HLA-B.prot.counted.fas
+<mark> HLA-B.prot.counted.fas </mark>
 
-A fasta file with one copy of each different protein sequence, their names according to the IPD-IMGT/HLA database, or an indication that they are new, followed by their size and how many times they were detected in your dataset. 
+<mark> A fasta file with one copy of each different protein sequence, their names according to the IPD-IMGT/HLA database, or an indication that they are new, followed by their size and how many times they were detected in your dataset. </mark>
 
+<mark> HLA-B.db.txt </mark>
 
-HLA-B.db.txt
-
-A tab separated file with the results for all samples. Please ignore the Genomic data if your data does not contain introns. There is also an indication of the size of each sequence.
-
+<mark> A tab separated file with the results for all samples. Please ignore the Genomic data if your data does not contain introns. There is also an indication of the size of each sequence. </mark>
 
 ## STEP 10 - Checking the alleles
 At this step, please check the .db.txt file and evaluate with this data is as you expected. There are too many new alleles, and you did not expect that? Maybe an artifact may be passed the VQSR/vcfx workflow and needs to be manually removed, or something correct didn't pass the filer and must be manually recovered. 
